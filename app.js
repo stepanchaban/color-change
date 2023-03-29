@@ -1,23 +1,63 @@
 const cols = document.querySelectorAll('.col');
 
-function generateRandomColor () {
-  // RGB
-  // #FF0000 RED
-  // #00FF00 GREEN
-  // #0000FF BLUE
+document.addEventListener('keydown', (event) => {
+  event.preventDefault();
+  if (event.code.toLowerCase() === 'space') {
+    setRandomColors();
+  }
+});
 
+document.addEventListener('click', (event) => {
+  const type = event.target.dataset.type;
+  
+  if (type === 'lock') {
+    const node = event.target.tagName.toLowerCase() === 'i'
+      ? event.target
+      : event.target.children[0];
+
+      node.classList.toggle('fa-lock-open');
+      node.classList.toggle('fa-lock');
+  } else if (type === 'copy') {
+    copyToClickBoard(event.target.textContent);
+  }
+
+});
+
+function generateRandomColor() {
   const hexCodes = '0123456789ABCDEF';
-  let color = '';
+  let colored = '';
   for (let i = 0; i < 6; i++) {
-    color += hexCodes[Math.floor(Math.random() * hexCodes.length)]
-  } 
-  return '#' + color;
+    colored += hexCodes[Math.floor(Math.random() * hexCodes.length)];
+  }
+  return '#' + colored;
+}
+
+function copyToClickBoard(text) {
+  return navigator.clipboard.writeText(text)
 }
 
 function setRandomColors() {
-  cols.forEach(function(col){
-    col.style.background = generateRandomColor ();
+  cols.forEach((col) => {
+    const color = generateRandomColor();
+    const text = col.querySelector('h2');
+    const button = col.querySelector('button');
+    const isLocked = col.querySelector('i').classList.contains('fa-lock'); 
+
+    if(isLocked) {
+      return
+    }
+
+    text.textContent = color;
+    col.style.background = color;
+
+    setTextColor(text, color);
+    setTextColor(button, color);
   });
 }
 
-setRandomColors()
+function setTextColor(text, color) {
+  const luminance = chroma(color).luminance();
+  text.style.color = luminance > 0.5 ? 'black' : 'white';
+}
+
+setRandomColors();
